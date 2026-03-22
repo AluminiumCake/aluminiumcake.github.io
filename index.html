@@ -1,3 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="refresh" content="0; URL=home" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AluminiumOS</title>
+    <link rel="icon" href="media/favicon.ico" type="image/x-icon">
+    <style>
+        @font-face {
+            font-family: 'PixelFont';
+            src: url('pixel_font.ttf') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PixelFont', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            background: url('media/wallpaper.jpg') no-repeat center center fixed;
+            background-size: cover;
+            transition: background 0.3s ease;
+        }
+
+        /* --- Lock Screen --- */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 80px 0; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(40px);
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        #lock-screen.hidden { opacity: 0; visibility: hidden; }
+        #lock-time { color: white; font-size: 80px; font-weight: 300; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .login-box { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .user-avatar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.5); background: white; padding: 5px; }
+        .login-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 10px 30px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .login-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+        /* --- Desktop --- */
+        .desktop { height: calc(100vh - 40px); position: relative; padding: 20px; }
+        .icon {
+            position: absolute; display: flex; flex-direction: column; align-items: center; text-align: center;
+            color: white; text-decoration: none; cursor: pointer; padding: 10px; width: 100px; height: 100px;
+            border-radius: 4px; text-shadow: 2px 2px 2px rgba(0,0,0,0.8); transition: top 0.2s ease, left 0.2s ease;
+        }
+        .icon:hover { background: rgba(255, 255, 255, 0.15); outline: 1px solid rgba(255, 255, 255, 0.2); }
+        .icon img { width: 48px; height: 48px; margin-bottom: 8px; pointer-events: none; image-rendering: pixelated; object-fit: contain; }
+
+        /* --- Taskbar --- */
+        .taskbar {
+            position: fixed; bottom: 0; width: 100%; height: 40px; background: rgba(20, 30, 40, 0.8);
+            backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex; justify-content: space-between; align-items: center; z-index: 10000;
+        }
+        .taskbar-left { display: flex; align-items: center; height: 100%; }
+        .start-btn { width: 55px; height: 100%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s; }
+        .start-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .start-btn img { width: 28px; height: 28px; object-fit: contain; }
+        .taskbar-apps { display: flex; height: 100%; margin-left: 5px; }
+        
+        .taskbar-item { height: 100%; display: flex; align-items: center; padding: 0 12px; cursor: pointer; position: relative; transition: background 0.2s; }
+        .taskbar-item:hover { background: rgba(255, 255, 255, 0.1); }
+        .taskbar-app-icon { width: 26px; height: 26px; object-fit: contain; }
+        .taskbar-item.open::after { content: ''; position: absolute; bottom: 0; left: 20%; width: 60%; height: 3px; background: #60a5fa; border-radius: 2px 2px 0 0; }
+        
+        .taskbar-right { display: flex; align-items: center; padding-right: 15px; color: white; font-size: 14px; }
+        .exit-btn-tb { margin-right: 15px; padding: 4px 10px; background: rgba(255,0,0,0.5); border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .exit-btn-tb:hover { background: rgba(255,0,0,0.8); }
+
+        /* --- Windows --- */
+        .window {
+            position: absolute; background: #f0f0f0; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            display: none; flex-direction: column; overflow: hidden; border-radius: 6px;
+        }
+        .window-header {
+            background: linear-gradient(to right, #1d4ed8, #3b82f6); color: white; padding: 8px 12px;
+            display: flex; justify-content: space-between; align-items: center; cursor: move; font-size: 14px;
+        }
+        .close-btn { background: #ef4444; color: white; border: none; width: 24px; height: 24px; cursor: pointer; border-radius: 3px; display: flex; align-items: center; justify-content: center; }
+        .close-btn:hover { background: #dc2626; }
+        .window-body { display: flex; flex: 1; height: 100%; background: white; min-height: 0; position: relative; }
+
+        .sidebar { width: 180px; background: #e5e5e5; border-right: 1px solid #ccc; padding: 10px 0; overflow-y: auto; }
+        .sidebar-item { padding: 12px 20px; cursor: pointer; font-size: 14px; text-transform: lowercase; }
+        .sidebar-item:hover { background: #dcdcdc; }
+        .sidebar-item.active { background: #3b82f6; color: white; }
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* Character & About Windows */
+        .char-tabs { display: flex; background: #e5e5e5; border-bottom: 1px solid #ccc; }
+        .char-tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-size: 14px; text-transform: lowercase; transition: 0.2s; }
+        .char-tab-btn:hover { background: #dcdcdc; }
+        .char-tab-btn.active { background: white; border-bottom: 2px solid #3b82f6; font-weight: bold; }
+        .char-content-area { padding: 20px 20px 40px 20px; text-align: center; overflow-y: auto; height: calc(100% - 40px); }
+        
+        .char-name { font-size: 24px; font-weight: bold; text-transform: lowercase; margin-bottom: 2px; }
+        .char-pronouns { font-size: 14px; color: #666; text-transform: lowercase; margin-bottom: 5px; }
+        .char-managed { font-size: 12px; color: #888; font-style: italic; text-transform: lowercase; margin-bottom: 15px; }
+        
+        .char-img-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .char-img-wrapper { display: flex; flex-direction: column; align-items: center; max-width: 180px; }
+        .char-img-wrapper img { width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 5px; }
+        .char-img-credit { font-size: 11px; color: #3b82f6; text-decoration: none; text-transform: lowercase; }
+        .char-img-credit:hover { text-decoration: underline; }
+        
+        .char-desc { font-size: 14px; text-align: center; line-height: 1.6; }
+        .centered-text { text-align: center; line-height: 1.6; font-size: 14px; }
+        .separator { height: 1px; width: 50%; background: #ccc; margin: 15px auto; }
+        
+        .vb-btn { display: inline-block; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin: 5px; font-size: 14px; text-transform: lowercase; transition: 0.2s; }
+        .vb-btn:hover { background: #1d4ed8; }
+        .preview-btn { background: #ef4444; }
+        .preview-btn:hover { background: #dc2626; }
+        .extra-btn { background: #10b981; }
+        .extra-btn:hover { background: #059669; }
+        
+        .tos-text { font-size: 14px; text-align: left; line-height: 1.6; white-space: pre-line; text-transform: lowercase; color: #333; }
+        .vb-note { font-size: 13px; color: #555; margin: 15px auto 10px auto; max-width: 80%; line-height: 1.4; }
+
+        /* Player Specific */
+        .player-list-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #ddd; font-size: 13px; text-transform: lowercase; }
+        .player-list-item:hover { background: #ddd; }
+        .player-list-item.active { background: #3b82f6; color: white; }
+
+        /* Start Menu */
+        .start-menu {
+            position: absolute; bottom: 40px; left: 0; width: 320px; background: rgba(245, 245, 245, 0.98);
+            backdrop-filter: blur(15px); border: 1px solid #444; display: none; flex-direction: column;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5); border-radius: 6px 6px 0 0; padding: 5px 0;
+        }
+        .start-menu.active { display: flex; }
+        .start-item { padding: 12px 15px; display: flex; align-items: center; color: #222; text-decoration: none; cursor: pointer; text-transform: lowercase; font-size: 14px; }
+        .start-item:hover { background: #0078d7; color: white; }
+        .start-item img { width: 24px; height: 24px; margin-right: 12px; object-fit: contain; }
+
+        /* Calculator */
+        .calc-container { width: 230px; padding: 10px; background: #d9e4f1; }
+        #calc-display { width: 100%; height: 40px; background: white; border: 1px solid #999; margin-bottom: 10px; text-align: right; padding: 5px; font-size: 20px; outline: none;}
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .calc-grid button { padding: 12px; border: 1px solid #888; background: linear-gradient(#ffffff, #e0e0e0); cursor: pointer; }
+
+        /* Paint Program */
+        #paint-canvas { background: white; cursor: crosshair; }
+        .paint-toolbar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; display: flex; gap: 5px; }
+        .paint-tool { background: none; color: white; border: 1px solid white; border-radius: 15px; padding: 5px 15px; cursor: pointer; font-size: 12px; }
+        .paint-tool.active { background: white; color: black; }
+
+        /* Dialog Overlay */
+        .dialog-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); z-index: 30000; display: none; 
+            align-items: center; justify-content: center;
+        }
+        .dialog-box {
+            background: white; padding: 25px; border-radius: 8px; width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;
+        }
+        .dialog-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .dialog-text { font-size: 14px; margin-bottom: 20px; color: #444; line-height: 1.4; }
+        .dialog-btns { display: flex; justify-content: center; gap: 10px; }
+        .dialog-btns button { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-yes { background: #3b82f6; color: white; }
+        .btn-no { background: #e5e5e5; color: black; }
+    </style>
 </head>
+<body>
+
+    <div id="lock-screen">
+        <div id="lock-time">00:00</div>
+        <div class="login-box">
+            <img src="media/favicon.ico" class="user-avatar" alt="user">
+            <h2 style="color: white; font-weight: normal; text-transform: lowercase;">c4ke</h2>
+            <button class="login-btn" onclick="unlock()">log in</button>
+        </div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 12px; text-transform: lowercase;">aluminiumOS 1.0</div>
+    </div>
+
+    <div id="exit-dialog" class="dialog-overlay">
+        <div class="dialog-box">
+            <div class="dialog-title">Return to the website?</div>
+            <div class="dialog-text">You're currently logged into AluminumOS, but you can switch to the regular version of the site at any time. Do you want to do that now?</div>
+            <div class="dialog-btns">
+                <button class="btn-yes" onclick="window.location.href='https://aluminiumcake.github.io/home.html'">Yes</button>
+                <button class="btn-no" onclick="hideExitDialog()">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="desktop" id="desktop">
+        <div class="icon" style="top: 20px; left: 20px;" onclick="openApp('win-about')"><img src="media/favicon.ico">about me.exe</div>
+        <a href="ust.html" class="icon" style="top: 130px; left: 20px;"><img src="media/utau.webp">ust.exe</a>
+        
+        <div class="icon" style="top: 240px; left: 20px;" onclick="openCharacter('keeki')"><img src="media/keekiicon.webp">keeki.exe</div>
+        <div class="icon" style="top: 350px; left: 20px;" onclick="openCharacter('kazeru')"><img src="media/kazeruicon.webp">kazeru.exe</div>
+        <div class="icon" style="top: 460px; left: 20px;" onclick="openCharacter('mei')"><img src="media/meiicon.webp">mei.exe</div>
+    </div>
+
+    <div id="win-about" class="window" style="width: 500px; height: 450px; top: 100px; left: 300px;">
+        <div class="window-header"><span>about me.exe</span><button class="close-btn" onclick="closeApp('win-about')">X</button></div>
+        <div class="window-body" style="padding: 20px; flex-direction: column; overflow-y: auto;">
+            <div class="centered-text">
+                <h1 style="font-size: 24px; margin-bottom: 5px;">c4ke</h1>
+                <p style="color: #666;">(any pronouns)</p>
+                <p>i'm male actually</p>
+                
+                <div class="separator"></div>
+                
+                <p>i make horrible vocal synth covers and voicebanks</p>
+                <br>
+                <p>my favs are defoko, meiko, xingchen stardust and po-iro (i mean po-uta and fuiro)</p>
+                <br>
+                <p>and yes, aluminium is my favorite element from periodic table</p>
+                <br><br>
+                
+                <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    <a href="https://www.youtube.com/@AluminiumCake" target="_blank" class="vb-btn">youtube 1</a>
+                    <a href="https://www.youtube.com/@CakeOfAluminium" target="_blank" class="vb-btn">youtube 2</a>
+                    <a href="https://soundcloud.com/aluminiumcake" target="_blank" class="vb-btn">soundcloud</a>
+                    <a href="https://x.com/AluminiumCake" target="_blank" class="vb-btn">twitter</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-character" class="window" style="width: 550px; height: 550px; top: 50px; left: 300px;">
+        <div class="window-header"><span id="char-win-title">character.exe</span><button class="close-btn" onclick="closeApp('win-character')">X</button></div>
+        <div style="display: flex; flex-direction: column; height: 100%; background: white;">
+            <div class="char-tabs">
+                <button class="char-tab-btn active" id="tab-btn-about" onclick="switchCharTab('about')">about</button>
+                <button class="char-tab-btn" id="tab-btn-voicebanks" onclick="switchCharTab('voicebanks')">voicebanks</button>
+                <button class="char-tab-btn" id="tab-btn-tos" onclick="switchCharTab('tos')">tos</button>
+            </div>
+            <div class="char-content-area" id="char-content"></div>
+        </div>
+    </div>
+
+    <div id="win-finder" class="window" style="width: 550px; height: 400px; top: 100px; left: 250px;">
+        <div class="window-header"><span>finder</span><button class="close-btn" onclick="closeApp('win-finder')">X</button></div>
+        <div class="window-body">
+            <div class="sidebar">
+                <div class="sidebar-item active" onclick="switchFinderTab('docs')">documents</div>
+                <div class="sidebar-item" onclick="switchFinderTab('apps')">applications</div>
+            </div>
+            <div class="main-content" id="finder-content"></div>
+        </div>
+    </div>
+
+    <div id="win-player" class="window" style="width: 800px; height: 480px; top: 80px; left: 150px;">
+        <div class="window-header"><span>player</span><button class="close-btn" onclick="closeApp('win-player')">X</button></div>
+        <div class="window-body">
+            <div class="sidebar" id="player-sidebar" style="width: 220px;"></div>
+            <div class="main-content" style="padding: 0; background: #000; display: flex; align-items: center; justify-content: center;">
+                <video id="local-video" width="100%" height="100%" controls style="outline:none;"></video>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-settings" class="window" style="width: 650px; height: 450px; top: 150px; left: 300px;">
+        <div class="window-header"><span>settings</span><button class="close-btn" onclick="closeApp('win-settings')">X</button></div>
+        <div class="window-body">
+            <div class="sidebar">
+                <div class="sidebar-item active" id="side-pers" onclick="switchSettingsTab('pers')">personalization</div>
+                <div class="sidebar-item" id="side-about" onclick="switchSettingsTab('about')">about system</div>
+            </div>
+            <div class="main-content" id="settings-content"></div>
+        </div>
+    </div>
+
+    <div id="win-notepad" class="window" style="width: 450px; height: 350px; top: 50px; left: 100px;">
+        <div class="window-header"><span>notepad</span><button class="close-btn" onclick="closeApp('win-notepad')">X</button></div>
+        <div class="window-body"><textarea style="width:100%; border:none; padding:15px; outline:none; resize:none; font-size:16px;"></textarea></div>
+    </div>
+
+    <div id="win-paint" class="window" style="width: 500px; height: 400px; top: 80px; left: 150px;">
+        <div class="window-header"><span>paint.exe</span><button class="close-btn" onclick="closeApp('win-paint')">X</button></div>
+        <div class="window-body">
+            <canvas id="paint-canvas" width="500" height="365"></canvas>
+            <div class="paint-toolbar">
+                <button class="paint-tool active" id="tool-pencil" onclick="setPaintTool('pencil')">✏️ pencil</button>
+                <button class="paint-tool" id="tool-eraser" onclick="setPaintTool('eraser')">🧼 eraser</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-calc" class="window" style="width: auto; top: 100px; left: 100px;">
+        <div class="window-header"><span>calculator</span><button class="close-btn" onclick="closeApp('win-calc')">X</button></div>
+        <div class="window-body calc-container">
+            <input type="text" id="calc-display" readonly value="0">
+            <div class="calc-grid">
+                <button onclick="clearCalc()">C</button><button onclick="inputCalc('/')">/</button><button onclick="inputCalc('*')">*</button><button onclick="inputCalc('-')">-</button>
+                <button onclick="inputCalc('7')">7</button><button onclick="inputCalc('8')">8</button><button onclick="inputCalc('9')">9</button>
+                <button style="grid-row: span 2;" onclick="inputCalc('+')">+</button>
+                <button onclick="inputCalc('4')">4</button><button onclick="inputCalc('5')">5</button><button onclick="inputCalc('6')">6</button>
+                <button onclick="inputCalc('1')">1</button><button onclick="inputCalc('2')">2</button><button onclick="inputCalc('3')">3</button>
+                <button style="grid-row: span 2;" onclick="calculate()">=</button>
+                <button style="grid-column: span 2;" onclick="inputCalc('0')">0</button><button onclick="inputCalc('.')">.</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="taskbar-left">
+            <div class="start-btn" id="start-btn"><img src="media/start.webp" alt="start"></div>
+            <div class="taskbar-apps">
+                <div class="taskbar-item" id="tb-win-finder" onclick="openApp('win-finder')"><img src="media/finder.png" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-calc" onclick="openApp('win-calc')"><img src="media/calc.webp" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-notepad" onclick="openApp('win-notepad')"><img src="media/notes.png" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-settings" onclick="openApp('win-settings')"><img src="media/settings.png" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-player" onclick="openApp('win-player')"><img src="media/player.webp" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-paint" onclick="openApp('win-paint')" style="display:none;"><img src="media/paint.webp" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-character" onclick="openApp('win-character')" style="display:none;"><img src="media/utau.webp" class="taskbar-app-icon" id="tb-char-icon"></div>
+            </div>
+        </div>
+        <div class="start-menu" id="start-menu">
+            <div class="start-item" onclick="openApp('win-finder')"><img src="media/finder.png"> finder</div>
+            <div class="start-item" onclick="openApp('win-notepad')"><img src="media/notes.png"> notepad</div>
+            <div class="start-item" onclick="openApp('win-calc')"><img src="media/calc.webp"> calculator</div>
+            <div class="start-item" onclick="openApp('win-paint')"><img src="media/paint.webp"> paint</div>
+            <div class="start-item" onclick="openApp('win-settings')"><img src="media/settings.png"> settings</div>
+            <div class="start-item" onclick="openApp('win-player')"><img src="media/player.webp"> player</div>
+        </div>
+        <div class="taskbar-right">
+            <div class="exit-btn-tb" onclick="showExitDialog()">exit</div>
+            <div id="clock">00:00</div>
+        </div>
+    </div>
+
+    <script>
+        const characters = {
+            keeki: {
+                winName: "keeki.exe",
+                name: "keeki",
+                pronouns: "he/they",
+                managed: "managed, designed, voiced by c4ke",
+                imgs: [
+                    { src: "media/keekiutaunormal.webp", credit: "artwork by morimori_1411", link: "https://x.com/morimori_1411" },
+                    { src: "media/keekirvcnormal.webp", credit: "artwork by х?дожник х!ев", link: "https://t.me/vzroslie_zapretbl" }
+                ],
+                about: `height - 171<br>weight - he doesn't remember<br>gender - male<br>likes - red color, rhythm games, waste time<br>dislikes - book, to read a lot<br>item - mint candy`,
+                voicebanks: [
+                    { label: "utau cv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/KeekiCV/CakeOfAluminiumCV.zip" },
+                    { label: "rvc ai", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/KeekiCV/CakeOfAluminiumRVC.zip" }
+                ],
+                extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/azwgm6hs752f5/CakeOfAluminium" },
+                preview: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            },
+            kazeru: {
+                winName: "kazeru.exe",
+                name: "kazeru",
+                pronouns: "he/him",
+                managed: "managed, designed, voiced by c4ke",
+                imgs: [
+                    { src: "media/kazeruutau.webp", credit: "artwork by х?дожник х!ев", link: "https://t.me/vzroslie_zapretbl" }
+                ],
+                about: `height - 178<br>weight - 30 kg<br>age - 6 years<br>birthday - july 17th<br>gender - male<br>likes - to scream, to sing<br>dislikes - red color<br>item - single drum stick`,
+                voicebanks: [
+                    { label: "utau cv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Kazeru/KazeruCV.zip" },
+                    { label: "utau vcv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Kazeru/KazeruVCV.zip" },
+                    { label: "utau cvvc", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Kazeru/KazeruCVVC.zip" },
+                    { label: "utau eng arpasing", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Kazeru/KazeruArpasing.zip" },
+                    { label: "utau eng c+v", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Kazeru/KazeruCplusV.zip" }
+                ],
+                vbNote: `vcv voicebank has got subbanks that works only in openutau, you can download all of them separately in "other voicebanks"`,
+                extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/7a9orjnojf93u/KA0" },
+                preview: "https://www.youtube.com/watch?v=M7lc1UVf-VE"
+            },
+            mei: {
+                winName: "zhao mei.exe",
+                name: "zhao mei",
+                pronouns: "she/her",
+                managed: "managed, designed, voiced by c4ke",
+                imgs: [
+                    { src: "media/meiutau.webp", credit: "artwork by morimori_1411", link: "https://x.com/morimori_1411" }
+                ],
+                about: `height - 162<br>weight - 33 kg<br>age - 17 years<br>birthday - july 17th<br>gender - female<br>likes - sweets, to be silent<br>dislikes - to sing<br>item - revolver`,
+                voicebanks: [
+                    { label: "utau cv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiCV.zip" },
+                    { label: "utau vcv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiVCV.zip" },
+                    { label: "utau vcv powerful", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiPowerfulVCV.zip" },
+                    { label: "utau cvvc", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiCVVC.zip" },
+                    { label: "utau eng c+v", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiCplusV.zip" },
+                    { label: "utau zhn", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiZHN.zip" }
+                ],
+                extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/r70vw0czu30xz/Mei" },
+                preview: "https://www.youtube.com/watch?v=vuY1Nf_QSR8"
+            }
+        };
+
+        const tosText = `by using voicebanks you agree to the following rules\n
+you are allowed to use my voicebanks and rvc in commerical use without permission
+you are not allowed to use my characters in commerical use without permission
+r-18 content is not prohibited
+you are allowed to make derivative voicebanks with original samples and redistribute them without permission`;
+
+        let currentChar = null;
+
+        function openCharacter(charId) {
+            currentChar = characters[charId];
+            document.getElementById('char-win-title').innerText = currentChar.winName;
+            
+            const tbChar = document.getElementById('tb-win-character');
+            tbChar.style.display = 'flex';
+            document.getElementById('tb-char-icon').src = currentChar.imgs[0].src;
+
+            openApp('win-character');
+            switchCharTab('about');
+        }
+
+        function switchCharTab(tab) {
+            if(!currentChar) return;
+            
+            document.querySelectorAll('.char-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-btn-${tab}`).classList.add('active');
+            
+            const content = document.getElementById('char-content');
+            
+            if (tab === 'about') {
+                let imgHtml = `<div class="char-img-row">`;
+                currentChar.imgs.forEach(img => {
+                    imgHtml += `
+                        <div class="char-img-wrapper">
+                            <img src="${img.src}">
+                            <a href="${img.link}" target="_blank" class="char-img-credit">${img.credit}</a>
+                        </div>
+                    `;
+                });
+                imgHtml += `</div>`;
+
+                content.innerHTML = `
+                    <div class="centered-text">
+                        <div class="char-name">${currentChar.name}</div>
+                        <div class="char-pronouns">${currentChar.pronouns}</div>
+                        <div class="char-managed">${currentChar.managed}</div>
+                        ${imgHtml}
+                        <div class="char-desc">${currentChar.about}</div>
+                    </div>
+                `;
+            } else if (tab === 'voicebanks') {
+                let btnsHtml = currentChar.voicebanks.map(vb => `<a href="${vb.url}" target="_blank" class="vb-btn">${vb.label}</a>`).join('');
+                
+                let extraHtml = "";
+                if (currentChar.vbNote) {
+                    extraHtml += `<div class="vb-note">${currentChar.vbNote}</div>`;
+                }
+                if (currentChar.extraBtn) {
+                    extraHtml += `<div><a href="${currentChar.extraBtn.url}" target="_blank" class="vb-btn extra-btn">${currentChar.extraBtn.label}</a></div>`;
+                }
+
+                content.innerHTML = `
+                    <div class="char-name" style="margin-bottom: 20px;">downloads</div>
+                    <div>${btnsHtml}</div>
+                    ${extraHtml}
+                    <div style="margin-top: 25px;">
+                        <a href="${currentChar.preview}" target="_blank" class="vb-btn preview-btn">▶ voicebanks preview</a>
+                    </div>
+                `;
+            } else if (tab === 'tos') {
+                content.innerHTML = `<div class="tos-text">${tosText}</div>`;
+            }
+        }
+
+        const localPlaylist = [
+            { name: "test video 1", file: "media/video1.mp4" },
+            { name: "test video 2", file: "media/video2.mp4" }
+        ];
+
+        let zIndex = 1000;
+        const GRID_SIZE = 110;
+        const OFFSET = 20;
+
+        function unlock() { document.getElementById('lock-screen').classList.add('hidden'); }
+
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('clock').textContent = timeStr;
+            document.getElementById('lock-time').textContent = timeStr;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        function openApp(id) {
+            const win = document.getElementById(id);
+            win.style.display = 'flex';
+            win.style.zIndex = ++zIndex;
+            
+            const tbItem = document.getElementById('tb-' + id);
+            if(tbItem) {
+                tbItem.classList.add('open');
+                if (id === 'win-paint') tbItem.style.display = 'flex';
+            }
+
+            if(id === 'win-finder') switchFinderTab('docs');
+            if(id === 'win-settings') switchSettingsTab('pers');
+            if(id === 'win-player' && !document.getElementById('player-sidebar').hasChildNodes()) initPlayer();
+        }
+
+        function closeApp(id) { 
+            document.getElementById(id).style.display = 'none'; 
+            
+            const tbItem = document.getElementById('tb-' + id);
+            if(tbItem) {
+                tbItem.classList.remove('open');
+                if (id === 'win-paint' || id === 'win-character') tbItem.style.display = 'none';
+            }
+
+            if(id === 'win-player') {
+                const vidEl = document.getElementById('local-video');
+                vidEl.pause();
+                vidEl.src = "";
+            }
+        }
+
+        function showExitDialog() { document.getElementById('exit-dialog').style.display = 'flex'; }
+        function hideExitDialog() { document.getElementById('exit-dialog').style.display = 'none'; }
+
+        function initPlayer() {
+            const sidebar = document.getElementById('player-sidebar');
+            localPlaylist.forEach((video) => {
+                const item = document.createElement('div');
+                item.className = 'player-list-item';
+                item.innerText = video.name;
+                item.onclick = () => {
+                    document.querySelectorAll('.player-list-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const vidEl = document.getElementById('local-video');
+                    vidEl.src = video.file;
+                    vidEl.play();
+                };
+                sidebar.appendChild(item);
+            });
+        }
+
+        document.getElementById('start-btn').onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('start-menu').classList.toggle('active');
+        };
+        document.onclick = () => document.getElementById('start-menu').classList.remove('active');
+
+        function makeDraggable(el, header, isIcon = false) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            header.onmousedown = (e) => {
+                el.style.zIndex = ++zIndex;
+                pos3 = e.clientX; pos4 = e.clientY;
+                if(isIcon) el.style.transition = 'none';
+
+                document.onmousemove = (e) => {
+                    pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+                    pos3 = e.clientX; pos4 = e.clientY;
+                    let newTop = el.offsetTop - pos2;
+                    let newLeft = el.offsetLeft - pos1;
+                    if (isIcon) {
+                        const maxL = window.innerWidth - el.offsetWidth - OFFSET;
+                        const maxT = window.innerHeight - 40 - el.offsetHeight - OFFSET;
+                        if (newLeft < OFFSET) newLeft = OFFSET; if (newLeft > maxL) newLeft = maxL;
+                        if (newTop < OFFSET) newTop = OFFSET; if (newTop > maxT) newTop = maxT;
+                    }
+                    el.style.top = newTop + "px"; el.style.left = newLeft + "px";
+                };
+
+                document.onmouseup = () => {
+                    document.onmousemove = null; document.onmouseup = null;
+                    if (isIcon) {
+                        el.style.transition = 'top 0.2s ease, left 0.2s ease';
+                        let fL = Math.round((parseInt(el.style.left) - OFFSET) / GRID_SIZE) * GRID_SIZE + OFFSET;
+                        let fT = Math.round((parseInt(el.style.top) - OFFSET) / GRID_SIZE) * GRID_SIZE + OFFSET;
+                        const icons = document.querySelectorAll('.icon');
+                        let isOccupied = true;
+                        let safety = 0;
+                        while (isOccupied && safety < 50) {
+                            isOccupied = false;
+                            icons.forEach(other => {
+                                if (other !== el && parseInt(other.style.left) === fL && parseInt(other.style.top) === fT) isOccupied = true;
+                            });
+                            if (isOccupied) { fT += GRID_SIZE; if (fT > window.innerHeight - 140) { fT = OFFSET; fL += GRID_SIZE; } }
+                            safety++;
+                        }
+                        el.style.left = fL + "px"; el.style.top = fT + "px";
+                    }
+                };
+            };
+        }
+
+        document.querySelectorAll('.window').forEach(w => makeDraggable(w, w.querySelector('.window-header'), false));
+        document.querySelectorAll('.icon').forEach(i => makeDraggable(i, i, true));
+
+        const canvas = document.getElementById('paint-canvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+        let currentTool = 'pencil';
+
+        function startPosition(e) { painting = true; drawPaint(e); }
+        function finishedPosition() { painting = false; ctx.beginPath(); }
+        function drawPaint(e) {
+            if(!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineWidth = currentTool === 'pencil' ? 3 : 25;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = currentTool === 'pencil' ? 'black' : 'white';
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', finishedPosition);
+        canvas.addEventListener('mousemove', drawPaint);
+        canvas.addEventListener('mouseleave', finishedPosition);
+
+        function setPaintTool(tool) {
+            currentTool = tool;
+            document.getElementById('tool-pencil').classList.remove('active');
+            document.getElementById('tool-eraser').classList.remove('active');
+            document.getElementById(`tool-${tool}`).classList.add('active');
+        }
+
+        let calcVal = "";
+        function inputCalc(v) { if(calcVal === "0") calcVal = ""; calcVal += v; document.getElementById('calc-display').value = calcVal; }
+        function clearCalc() { calcVal = "0"; document.getElementById('calc-display').value = "0"; }
+        function calculate() { try { calcVal = eval(calcVal).toString(); document.getElementById('calc-display').value = calcVal; } catch { clearCalc(); } }
+
+        function switchFinderTab(tab) {
+            const content = document.getElementById('finder-content');
+            document.querySelectorAll('#win-finder .sidebar-item').forEach(i => i.classList.remove('active'));
+            if(tab === 'docs') {
+                content.innerHTML = `<h2>desktop files</h2><hr><br><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size: 14px;">
+                <p onclick="openApp('win-about')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/favicon.ico" style="width:20px; margin-right:8px; object-fit:contain;"> about me.exe</p>
+                <a href="ust.html" style="color:#0055ff; text-decoration:none; display:flex; align-items:center;"><img src="media/utau.webp" style="width:20px; margin-right:8px; object-fit:contain;"> ust.exe</a>
+                <p onclick="openCharacter('keeki')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/keekiicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> keeki.exe</p>
+                <p onclick="openCharacter('kazeru')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/kazeruicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> kazeru.exe</p>
+                <p onclick="openCharacter('mei')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/meiicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> mei.exe</p></div>`;
+            } else {
+                content.innerHTML = `<h2>system applications</h2><hr><br><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size: 14px;">
+                <p onclick="openApp('win-calc')" style="cursor:pointer; display:flex; align-items:center;"><img src="media/calc.webp" style="width:20px; margin-right:8px; object-fit:contain;"> calculator</p>
+                <p onclick="openApp('win-notepad')" style="cursor:pointer; display:flex; align-items:center;"><img src="media/notes.png" style="width:20px; margin-right:8px; object-fit:contain;"> notepad</p>
+                <p onclick="openApp('win-settings')" style="cursor:pointer; display:flex; align-items:center;"><img src="media/settings.png" style="width:20px; margin-right:8px; object-fit:contain;"> settings</p>
+                <p onclick="openApp('win-player')" style="cursor:pointer; display:flex; align-items:center;"><img src="media/player.webp" style="width:20px; margin-right:8px; object-fit:contain;"> player</p>
+                <p onclick="openApp('win-paint')" style="cursor:pointer; display:flex; align-items:center;"><img src="media/paint.webp" style="width:20px; margin-right:8px; object-fit:contain;"> paint</p></div>`;
+            }
+        }
+
+        function switchSettingsTab(tab) {
+            const content = document.getElementById('settings-content');
+            document.querySelectorAll('#win-settings .sidebar-item').forEach(i => i.classList.remove('active'));
+            if(tab === 'pers') {
+                document.getElementById('side-pers').classList.add('active');
+                content.innerHTML = `<h2>personalization</h2><hr><br>
+                <p style="font-size: 14px;">change wallpaper via url:</p>
+                <input type="text" id="bg-inp" placeholder="paste link..." style="width:100%; margin:10px 0; padding:8px;">
+                <button onclick="changeBg(document.getElementById('bg-inp').value)" style="padding: 5px 15px; margin-right: 10px;">apply</button>
+                <button onclick="changeBg('media/wallpaper.jpg')" style="padding: 5px 15px;">reset to default</button>`;
+            } else {
+                document.getElementById('side-about').classList.add('active');
+                content.innerHTML = `<h2>about aluminiumOS</h2><hr><br><p style="font-size:20px; color:#1d4ed8;">aluminiumOS 1.0 pro</p><br><p style="font-size: 14px;"><b>developer:</b> c4ke</p><p style="font-size: 14px;"><b>system status:</b> activated</p><p style="font-size: 14px;"><b>serial:</b> b39bqv41n3az</p>`;
+            }
+        }
+        function changeBg(url) { if(url) document.body.style.backgroundImage = `url('${url}')`; }
+    </script>
+</body>
+</html>
