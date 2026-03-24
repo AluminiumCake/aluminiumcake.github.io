@@ -46,7 +46,7 @@
         .icon {
             position: absolute; display: flex; flex-direction: column; align-items: center; text-align: center;
             color: white; text-decoration: none; cursor: pointer; padding: 10px; width: 100px; height: 100px;
-            border-radius: 4px; text-shadow: 2px 2px 2px rgba(0,0,0,0.8); transition: top 0.2s ease, left 0.2s ease;
+            border-radius: 4px; text-shadow: 2px 2px 2px rgba(0,0,0,0.8); transition: top 0.2s ease, left 0.2s ease, right 0.2s ease;
         }
         .icon:hover { background: rgba(255, 255, 255, 0.15); outline: 1px solid rgba(255, 255, 255, 0.2); }
         .icon img { width: 48px; height: 48px; margin-bottom: 8px; pointer-events: none; image-rendering: pixelated; object-fit: contain; }
@@ -112,7 +112,7 @@
         .centered-text { text-align: center; line-height: 1.6; font-size: 14px; }
         .separator { height: 1px; width: 50%; background: #ccc; margin: 15px auto; }
         
-        .vb-btn { display: inline-block; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin: 5px; font-size: 14px; text-transform: lowercase; transition: 0.2s; }
+        .vb-btn { display: inline-block; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin: 5px; font-size: 14px; text-transform: lowercase; transition: 0.2s; border: none; cursor: pointer; font-family: inherit;}
         .vb-btn:hover { background: #1d4ed8; }
         .preview-btn { background: #ef4444; }
         .preview-btn:hover { background: #dc2626; }
@@ -198,6 +198,18 @@
         <div class="icon" style="top: 240px; left: 20px;" onclick="openCharacter('keeki')"><img src="media/keekiicon.webp">keeki.exe</div>
         <div class="icon" style="top: 350px; left: 20px;" onclick="openCharacter('kazeru')"><img src="media/kazeruicon.webp">kazeru.exe</div>
         <div class="icon" style="top: 460px; left: 20px;" onclick="openCharacter('mei')"><img src="media/meiicon.webp">mei.exe</div>
+
+        <div class="icon" style="top: 20px; right: 20px;" onclick="openApp('win-folder-misc')"><img src="media/folder.webp">misc voicebanks</div>
+    </div>
+
+    <div id="win-folder-misc" class="window" style="width: 450px; height: 350px; top: 150px; left: 250px;">
+        <div class="window-header"><span>misc voicebanks</span><button class="close-btn" onclick="closeApp('win-folder-misc')">X</button></div>
+        <div class="window-body" style="padding: 20px; display: flex; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; padding: 10px; width: 100px; border-radius: 4px; font-size: 14px;" onclick="openCharacter('jevil')">
+                <img src="media/jevil.webp" alt="jevil" style="width: 48px; height: 48px; margin-bottom: 8px; object-fit: contain;">
+                jevilloid.exe
+            </div>
+        </div>
     </div>
 
     <div id="win-about" class="window" style="width: 500px; height: 450px; top: 100px; left: 300px;">
@@ -253,7 +265,7 @@
     <div id="win-player" class="window" style="width: 800px; height: 480px; top: 80px; left: 150px;">
         <div class="window-header"><span>player</span><button class="close-btn" onclick="closeApp('win-player')">X</button></div>
         <div class="window-body">
-            <div class="sidebar" id="player-sidebar" style="width: 220px;"></div>
+            <div class="sidebar" id="player-sidebar" style="width: 250px;"></div>
             <div class="main-content" style="padding: 0; background: #000; display: flex; align-items: center; justify-content: center;">
                 <video id="local-video" width="100%" height="100%" controls style="outline:none;"></video>
             </div>
@@ -313,6 +325,7 @@
                 <div class="taskbar-item" id="tb-win-settings" onclick="openApp('win-settings')"><img src="media/settings.png" class="taskbar-app-icon"></div>
                 <div class="taskbar-item" id="tb-win-player" onclick="openApp('win-player')"><img src="media/player.webp" class="taskbar-app-icon"></div>
                 <div class="taskbar-item" id="tb-win-paint" onclick="openApp('win-paint')" style="display:none;"><img src="media/paint.webp" class="taskbar-app-icon"></div>
+                <div class="taskbar-item" id="tb-win-folder-misc" onclick="openApp('win-folder-misc')" style="display:none;"><img src="media/folder.webp" class="taskbar-app-icon"></div>
                 <div class="taskbar-item" id="tb-win-character" onclick="openApp('win-character')" style="display:none;"><img src="media/utau.webp" class="taskbar-app-icon" id="tb-char-icon"></div>
             </div>
         </div>
@@ -331,6 +344,13 @@
     </div>
 
     <script>
+        const localPlaylist = [
+            { name: "keeki release!", file: "media/video1.mp4" },
+            { name: "kazeru release!!", file: "media/video2.mp4" },
+            { name: "zhao mei release!!!", file: "media/video3.mp4" },
+            { name: "jevil voicebank preview", file: "media/jevil.mp4" }
+        ];
+
         const characters = {
             keeki: {
                 winName: "keeki.exe",
@@ -347,7 +367,7 @@
                     { label: "rvc ai", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/KeekiCV/CakeOfAluminiumRVC.zip" }
                 ],
                 extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/azwgm6hs752f5/CakeOfAluminium" },
-                preview: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                previewVideoIndex: 0
             },
             kazeru: {
                 winName: "kazeru.exe",
@@ -367,7 +387,7 @@
                 ],
                 vbNote: `vcv voicebank has got subbanks that works only in openutau, you can download all of them separately in "other voicebanks"`,
                 extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/7a9orjnojf93u/KA0" },
-                preview: "https://www.youtube.com/watch?v=M7lc1UVf-VE"
+                previewVideoIndex: 1
             },
             mei: {
                 winName: "zhao mei.exe",
@@ -377,7 +397,7 @@
                 imgs: [
                     { src: "media/meiutau.webp", credit: "artwork by morimori_1411", link: "https://x.com/morimori_1411" }
                 ],
-                about: `height - 162<br>weight - 33 kg<br>age - 17 years<br>birthday - february 30th<br>gender - female<br>likes - sweets, to be silent<br>dislikes - to sing<br>item - revolver`,
+                about: `height - 162<br>weight - 33 kg<br>age - 17 years<br>birthday - july 17th<br>gender - female<br>likes - sweets, to be silent<br>dislikes - to sing<br>item - revolver`,
                 voicebanks: [
                     { label: "utau cv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiCV.zip" },
                     { label: "utau vcv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiVCV.zip" },
@@ -387,7 +407,16 @@
                     { label: "utau zhn", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiZHN.zip" }
                 ],
                 extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/r70vw0czu30xz/Mei" },
-                preview: "https://www.youtube.com/watch?v=vuY1Nf_QSR8"
+                previewVideoIndex: 2
+            },
+            jevil: {
+                isMisc: true,
+                winName: "jevilloid.exe",
+                name: "jevilloid",
+                imgs: [{ src: "media/jevil.webp" }],
+                voicebanks: [{ label: "c+v utau", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/jeviloid.zip" }],
+                previewVideoIndex: 3,
+                credits: "all credits goes to toby fox, temmie chang and other deltarune developers"
             }
         };
 
@@ -399,13 +428,23 @@ you are allowed to make derivative voicebanks with original samples and redistri
 
         let currentChar = null;
 
+        function playPreview(index) {
+            openApp('win-player');
+            setTimeout(() => {
+                const items = document.querySelectorAll('.player-list-item');
+                if(items[index]) {
+                    items[index].click();
+                }
+            }, 50);
+        }
+
         function openCharacter(charId) {
             currentChar = characters[charId];
             document.getElementById('char-win-title').innerText = currentChar.winName;
             
             const tbChar = document.getElementById('tb-win-character');
             tbChar.style.display = 'flex';
-            document.getElementById('tb-char-icon').src = currentChar.imgs[0].src;
+            document.getElementById('tb-char-icon').src = Array.isArray(currentChar.imgs) ? currentChar.imgs[0].src : currentChar.imgs[0].src;
 
             openApp('win-character');
             switchCharTab('about');
@@ -414,10 +453,35 @@ you are allowed to make derivative voicebanks with original samples and redistri
         function switchCharTab(tab) {
             if(!currentChar) return;
             
-            document.querySelectorAll('.char-tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tab-btn-${tab}`).classList.add('active');
-            
             const content = document.getElementById('char-content');
+            const tabsNav = document.querySelector('.char-tabs');
+
+            if (currentChar.isMisc) {
+                tabsNav.style.display = 'none';
+                content.innerHTML = `
+                    <div class="centered-text" style="padding-top: 30px;">
+                        <div class="char-img-wrapper" style="margin: 0 auto 25px auto; max-width: 180px;">
+                            <img src="${currentChar.imgs[0].src}" style="width: 100%; border-radius: 8px;">
+                        </div>
+                        <div>
+                            <a href="${currentChar.voicebanks[0].url}" target="_blank" class="vb-btn">${currentChar.voicebanks[0].label}</a>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button onclick="playPreview(${currentChar.previewVideoIndex})" class="vb-btn preview-btn">▶ voicebank preview</button>
+                        </div>
+                        <div style="margin-top: 50px; font-size: 11px; color: #888; text-transform: lowercase;">
+                            ${currentChar.credits}
+                        </div>
+                    </div>
+                `;
+                return;
+            } else {
+                tabsNav.style.display = 'flex';
+            }
+            
+            document.querySelectorAll('.char-tab-btn').forEach(b => b.classList.remove('active'));
+            const activeTabBtn = document.getElementById(`tab-btn-${tab}`);
+            if (activeTabBtn) activeTabBtn.classList.add('active');
             
             if (tab === 'about') {
                 let imgHtml = `<div class="char-img-row">`;
@@ -456,18 +520,13 @@ you are allowed to make derivative voicebanks with original samples and redistri
                     <div>${btnsHtml}</div>
                     ${extraHtml}
                     <div style="margin-top: 25px;">
-                        <a href="${currentChar.preview}" target="_blank" class="vb-btn preview-btn">▶ voicebanks preview</a>
+                        <button onclick="playPreview(${currentChar.previewVideoIndex})" class="vb-btn preview-btn">▶ voicebanks preview</button>
                     </div>
                 `;
             } else if (tab === 'tos') {
                 content.innerHTML = `<div class="tos-text">${tosText}</div>`;
             }
         }
-
-        const localPlaylist = [
-            { name: "test video 1", file: "media/video1.mp4" },
-            { name: "test video 2", file: "media/video2.mp4" }
-        ];
 
         let zIndex = 1000;
         const GRID_SIZE = 110;
@@ -491,7 +550,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
             const tbItem = document.getElementById('tb-' + id);
             if(tbItem) {
                 tbItem.classList.add('open');
-                if (id === 'win-paint') tbItem.style.display = 'flex';
+                if (id === 'win-paint' || id === 'win-folder-misc') tbItem.style.display = 'flex';
             }
 
             if(id === 'win-finder') switchFinderTab('docs');
@@ -505,7 +564,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
             const tbItem = document.getElementById('tb-' + id);
             if(tbItem) {
                 tbItem.classList.remove('open');
-                if (id === 'win-paint' || id === 'win-character') tbItem.style.display = 'none';
+                if (id === 'win-paint' || id === 'win-character' || id === 'win-folder-misc') tbItem.style.display = 'none';
             }
 
             if(id === 'win-player') {
@@ -516,7 +575,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
         }
 
         function showExitDialog() { document.getElementById('exit-dialog').style.display = 'flex'; }
-        function hideExitDialog() { document.getElementById('exit-dialog').style.display = 'none'; }
+        function hideExitDialog() { document.getElementById('exit-dialog').style.none; }
 
         function initPlayer() {
             const sidebar = document.getElementById('player-sidebar');
@@ -560,6 +619,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
                         if (newTop < OFFSET) newTop = OFFSET; if (newTop > maxT) newTop = maxT;
                     }
                     el.style.top = newTop + "px"; el.style.left = newLeft + "px";
+                    if(isIcon) el.style.right = 'auto'; // Clear right property if moving
                 };
 
                 document.onmouseup = () => {
@@ -568,7 +628,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
                         el.style.transition = 'top 0.2s ease, left 0.2s ease';
                         let fL = Math.round((parseInt(el.style.left) - OFFSET) / GRID_SIZE) * GRID_SIZE + OFFSET;
                         let fT = Math.round((parseInt(el.style.top) - OFFSET) / GRID_SIZE) * GRID_SIZE + OFFSET;
-                        const icons = document.querySelectorAll('.icon');
+                        const icons = document.querySelectorAll('.desktop > .icon');
                         let isOccupied = true;
                         let safety = 0;
                         while (isOccupied && safety < 50) {
@@ -586,7 +646,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
         }
 
         document.querySelectorAll('.window').forEach(w => makeDraggable(w, w.querySelector('.window-header'), false));
-        document.querySelectorAll('.icon').forEach(i => makeDraggable(i, i, true));
+        document.querySelectorAll('.desktop > .icon').forEach(i => makeDraggable(i, i, true));
 
         const canvas = document.getElementById('paint-canvas');
         const ctx = canvas.getContext('2d');
@@ -637,7 +697,8 @@ you are allowed to make derivative voicebanks with original samples and redistri
                 <a href="ust.html" style="color:#0055ff; text-decoration:none; display:flex; align-items:center;"><img src="media/utau.webp" style="width:20px; margin-right:8px; object-fit:contain;"> ust.exe</a>
                 <p onclick="openCharacter('keeki')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/keekiicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> keeki.exe</p>
                 <p onclick="openCharacter('kazeru')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/kazeruicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> kazeru.exe</p>
-                <p onclick="openCharacter('mei')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/meiicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> mei.exe</p></div>`;
+                <p onclick="openCharacter('mei')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/meiicon.webp" style="width:20px; margin-right:8px; object-fit:contain;"> mei.exe</p>
+                <p onclick="openApp('win-folder-misc')" style="color:#0055ff; cursor:pointer; display:flex; align-items:center;"><img src="media/folder.webp" style="width:20px; margin-right:8px; object-fit:contain;"> misc voicebanks</p></div>`;
             } else {
                 content.innerHTML = `<h2>system applications</h2><hr><br><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size: 14px;">
                 <p onclick="openApp('win-calc')" style="cursor:pointer; display:flex; align-items:center;"><img src="media/calc.webp" style="width:20px; margin-right:8px; object-fit:contain;"> calculator</p>
