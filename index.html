@@ -147,6 +147,8 @@
         .preview-btn:hover { background: #dc2626; }
         .extra-btn { background: #10b981; }
         .extra-btn:hover { background: #059669; }
+        .guide-btn { background: #8b5cf6; }
+        .guide-btn:hover { background: #7c3aed; }
         
         .tos-text { font-size: 14px; text-align: left; line-height: 1.6; white-space: pre-line; text-transform: lowercase; color: #333; }
         .vb-note { font-size: 13px; color: #555; margin: 15px auto 10px auto; max-width: 80%; line-height: 1.4; }
@@ -270,6 +272,26 @@
         </div>
     </div>
 
+    <div id="win-belarusian" class="window" style="width: 500px; height: 400px; top: 150px; left: 350px;">
+        <div class="window-header"><span>belarusian.exe</span><button class="close-btn" onclick="closeApp('win-belarusian')">X</button></div>
+        <div class="window-body" style="padding: 20px; overflow-y: auto;">
+            <div class="centered-text">
+                <p>because i made belarusian c+v reclist it doesn't have phonemizer, so there's a little guide how to use it + links for reclist and base oto</p>
+                <div class="separator"></div>
+                <p style="font-weight: bold; margin-bottom: 10px;">phonemes</p>
+                <p>gh - г / w- ў / iy - й</p>
+                <p>' - soft sound</p>
+                <p>ya, ye, yo - я, е, ё after vowel</p>
+                <p>to use я, е, ё after consonant just make it soft with '</p>
+                <br><br>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <a href="https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/CplusVBelarusianRecList.zip" target="_blank" class="vb-btn" style="width: 250px;">reclist</a>
+                    <a href="https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/CplusVBelarusianBaseOto.zip" target="_blank" class="vb-btn" style="width: 250px;">kazeru's base oto</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="win-character" class="window" style="width: 550px; height: 550px; top: 50px; left: 300px;">
         <div class="window-header"><span id="char-win-title">character.exe</span><button class="close-btn" onclick="closeApp('win-character')">X</button></div>
         <div style="display: flex; flex-direction: column; height: 100%; background: white;">
@@ -358,6 +380,7 @@
                 <div class="taskbar-item" id="tb-win-paint" onclick="openApp('win-paint')" style="display:none;"><img src="media/paint.webp" class="taskbar-app-icon"></div>
                 <div class="taskbar-item" id="tb-win-folder-misc" onclick="openApp('win-folder-misc')" style="display:none;"><img src="media/folder.webp" class="taskbar-app-icon"></div>
                 <div class="taskbar-item" id="tb-win-character" onclick="openApp('win-character')" style="display:none;"><img src="media/utau.webp" class="taskbar-app-icon" id="tb-char-icon"></div>
+                <div class="taskbar-item" id="tb-win-belarusian" onclick="openApp('win-belarusian')" style="display:none;"><img src="media/notes.png" class="taskbar-app-icon"></div>
             </div>
         </div>
         <div class="start-menu" id="start-menu">
@@ -420,6 +443,7 @@
                 ],
                 vbNote: `vcv voicebank has got subbanks that works only in openutau, you can download all of them separately in "other voicebanks"`,
                 extraBtn: { label: "other voicebanks", url: "https://www.mediafire.com/folder/7a9orjnojf93u/KA0" },
+                guideBtn: { label: "belarusian guide", action: "openApp('win-belarusian')" },
                 previewVideoIndex: 1
             },
             mei: {
@@ -430,7 +454,7 @@
                 imgs: [
                     { src: "media/meiutau.webp", credit: "artwork by morimori_1411", link: "https://x.com/morimori_1411" }
                 ],
-                about: `height - 162<br>weight - 33 kg<br>age - 17 years<br>birthday - 29th february<br>gender - female<br>likes - sweets, to be silent<br>dislikes - to sing<br>item - revolver`,
+                about: `height - 162<br>weight - 33 kg<br>age - 17 years<br>birthday - 30th february<br>gender - female<br>likes - sweets, to be silent<br>dislikes - to sing<br>item - revolver`,
                 voicebanks: [
                     { label: "utau cv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiCV.zip" },
                     { label: "utau vcv", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/Mei/ZhaoMeiVCV.zip" },
@@ -547,6 +571,9 @@ you are allowed to make derivative voicebanks with original samples and redistri
                 if (currentChar.extraBtn) {
                     extraHtml += `<div><a href="${currentChar.extraBtn.url}" target="_blank" class="vb-btn extra-btn">${currentChar.extraBtn.label}</a></div>`;
                 }
+                if (currentChar.guideBtn) {
+                    extraHtml += `<div style="margin-top: 5px;"><button onclick="${currentChar.guideBtn.action}" class="vb-btn guide-btn">${currentChar.guideBtn.label}</button></div>`;
+                }
 
                 content.innerHTML = `
                     <div class="char-name" style="margin-bottom: 20px;">downloads</div>
@@ -583,7 +610,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
             const tbItem = document.getElementById('tb-' + id);
             if(tbItem) {
                 tbItem.classList.add('open');
-                if (id === 'win-paint' || id === 'win-folder-misc') tbItem.style.display = 'flex';
+                if (id === 'win-paint' || id === 'win-folder-misc' || id === 'win-belarusian') tbItem.style.display = 'flex';
             }
 
             if(id === 'win-finder') switchFinderTab('docs');
@@ -597,7 +624,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
             const tbItem = document.getElementById('tb-' + id);
             if(tbItem) {
                 tbItem.classList.remove('open');
-                if (id === 'win-paint' || id === 'win-character' || id === 'win-folder-misc') tbItem.style.display = 'none';
+                if (id === 'win-paint' || id === 'win-character' || id === 'win-folder-misc' || id === 'win-belarusian') tbItem.style.display = 'none';
             }
 
             if(id === 'win-player') {
