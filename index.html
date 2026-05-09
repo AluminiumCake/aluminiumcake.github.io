@@ -24,116 +24,90 @@
             overflow: hidden;
             background: url('media/wallpaper.jpg') no-repeat center center fixed;
             background-size: cover;
-            transition: background 0.3s ease;
         }
 
         /* --- Lock Screen --- */
         #lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 80px 0; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(40px);
-            transition: opacity 0.6s ease, visibility 0.6s;
+            padding: 80px 0; background: rgba(0, 0, 0, 0.7); 
         }
-        #lock-screen.hidden { opacity: 0; visibility: hidden; }
-        #lock-time { color: white; font-size: 80px; font-weight: 300; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #lock-screen.hidden { display: none; }
+        #lock-time { color: white; font-size: 80px; }
         .login-box { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .user-avatar { width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.5); background: white; padding: 5px; }
-        .login-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 10px 30px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
-        .login-btn:hover { background: rgba(255, 255, 255, 0.4); }
+        .user-avatar { width: 100px; height: 100px; border: 2px solid white; background: white; padding: 5px; }
+        .login-btn { background: #333; border: 1px solid white; color: white; padding: 10px 30px; cursor: pointer; }
+        .login-btn:hover { background: #555; }
 
         /* --- Desktop --- */
         .desktop { height: calc(100vh - 40px); position: relative; padding: 20px; }
         .icon {
             position: absolute; display: flex; flex-direction: column; align-items: center; text-align: center;
             color: white; text-decoration: none; cursor: pointer; padding: 10px; width: 100px; height: 100px;
-            border-radius: 4px; text-shadow: 2px 2px 2px rgba(0,0,0,0.8); transition: top 0.2s ease, left 0.2s ease;
+            text-shadow: 1px 1px 2px black;
         }
-        .icon:hover { background: rgba(255, 255, 255, 0.15); outline: 1px solid rgba(255, 255, 255, 0.2); }
+        .icon:hover { background: rgba(255, 255, 255, 0.2); outline: 1px solid white; }
         .icon img { width: 48px; height: 48px; margin-bottom: 8px; pointer-events: none; image-rendering: pixelated; object-fit: contain; }
 
         /* --- Taskbar --- */
         .taskbar {
-            position: fixed; bottom: 0; width: 100%; height: 40px; background: rgba(20, 30, 40, 0.8);
-            backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.2);
+            position: fixed; bottom: 0; width: 100%; height: 40px; background: #222; border-top: 1px solid #555;
             display: flex; justify-content: space-between; align-items: center; z-index: 10000;
         }
         .taskbar-left { display: flex; align-items: center; height: 100%; }
-        .start-btn { width: 55px; height: 100%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s; }
-        .start-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .start-btn { width: 55px; height: 100%; display: flex; justify-content: center; align-items: center; cursor: pointer; background: #333;}
+        .start-btn:hover { background: #555; }
         .start-btn img { width: 28px; height: 28px; object-fit: contain; }
         .taskbar-apps { display: flex; height: 100%; margin-left: 5px; }
         
-        .taskbar-item { height: 100%; display: flex; align-items: center; padding: 0 12px; cursor: pointer; position: relative; transition: background 0.2s; }
-        .taskbar-item:hover { background: rgba(255, 255, 255, 0.1); }
+        .taskbar-item { height: 100%; display: flex; align-items: center; padding: 0 12px; cursor: pointer; border-right: 1px solid #444; }
+        .taskbar-item:hover { background: #444; }
         .taskbar-app-icon { width: 26px; height: 26px; object-fit: contain; }
-        .taskbar-item.open::after { content: ''; position: absolute; bottom: 0; left: 20%; width: 60%; height: 3px; background: #60a5fa; border-radius: 2px 2px 0 0; }
+        .taskbar-item.open { background: #555; border-bottom: 3px solid #3b82f6; }
         
         .taskbar-right { display: flex; align-items: center; padding-right: 15px; color: white; font-size: 14px; }
-        .exit-btn-tb { margin-right: 15px; padding: 4px 10px; background: rgba(255,0,0,0.5); border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        .exit-btn-tb:hover { background: rgba(255,0,0,0.8); }
+        .exit-btn-tb { margin-right: 15px; padding: 4px 10px; background: #ef4444; border: 1px solid #991b1b; cursor: pointer; color: white; }
+        .exit-btn-tb:hover { background: #dc2626; }
 
         /* --- Windows --- */
         .window {
-            position: absolute; background: #f0f0f0; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            display: none; flex-direction: column; overflow: hidden; border-radius: 6px;
+            position: absolute; background: #f0f0f0; border: 1px solid #000; box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            display: none; flex-direction: column; overflow: hidden;
         }
         .window-header {
-            background: linear-gradient(to right, #1d4ed8, #3b82f6); color: white; padding: 8px 12px;
-            display: flex; justify-content: space-between; align-items: center; cursor: move; font-size: 14px;
+            background: #0000FF; color: white; padding: 8px 12px;
+            display: flex; justify-content: space-between; align-items: center; cursor: move; font-size: 14px; border-bottom: 1px solid #000;
         }
-        .close-btn { background: #ef4444; color: white; border: none; width: 24px; height: 24px; cursor: pointer; border-radius: 3px; display: flex; align-items: center; justify-content: center; }
+        .close-btn { background: #ef4444; color: white; border: 1px solid #000; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .close-btn:hover { background: #dc2626; }
         .window-body { display: flex; flex: 1; height: 100%; background: white; min-height: 0; position: relative; }
 
         .sidebar { width: 180px; background: #e5e5e5; border-right: 1px solid #ccc; padding: 10px 0; overflow-y: auto; }
         .sidebar-item { padding: 12px 20px; cursor: pointer; font-size: 14px; text-transform: lowercase; }
-        .sidebar-item:hover { background: #dcdcdc; }
+        .sidebar-item:hover { background: #ccc; }
         .sidebar-item.active { background: #3b82f6; color: white; }
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
 
-        /* Folder Grid (Misc Voicebanks) */
-        .folder-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 15px;
-            width: 100%;
-            align-content: start;
-        }
-        .folder-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-        .folder-item:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        .folder-item img {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 8px;
-            object-fit: contain;
-        }
+        /* Folder Grid */
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; width: 100%; align-content: start; }
+        .folder-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; padding: 10px; font-size: 14px; border: 1px solid transparent; }
+        .folder-item:hover { background: #e5e5e5; border: 1px solid #ccc; }
+        .folder-item img { width: 48px; height: 48px; margin-bottom: 8px; object-fit: contain; }
 
-        /* Character & About Windows */
+        /* Character Windows */
         .char-tabs { display: flex; background: #e5e5e5; border-bottom: 1px solid #ccc; }
-        .char-tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-size: 14px; text-transform: lowercase; transition: 0.2s; }
-        .char-tab-btn:hover { background: #dcdcdc; }
-        .char-tab-btn.active { background: white; border-bottom: 2px solid #3b82f6; font-weight: bold; }
+        .char-tab-btn { flex: 1; padding: 10px; border: none; border-right: 1px solid #ccc; background: none; cursor: pointer; font-size: 14px; text-transform: lowercase; }
+        .char-tab-btn:hover { background: #ccc; }
+        .char-tab-btn.active { background: white; font-weight: bold; border-bottom: 2px solid white; margin-bottom: -1px; }
         .char-content-area { padding: 20px 20px 40px 20px; text-align: center; overflow-y: auto; height: calc(100% - 40px); }
         
         .char-name { font-size: 24px; font-weight: bold; text-transform: lowercase; margin-bottom: 2px; }
         .char-pronouns { font-size: 14px; color: #666; text-transform: lowercase; margin-bottom: 5px; }
-        .char-managed { font-size: 12px; color: #888; font-style: italic; text-transform: lowercase; margin-bottom: 15px; }
+        .char-managed { font-size: 12px; color: #888; text-transform: lowercase; margin-bottom: 15px; }
         
         .char-img-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
         .char-img-wrapper { display: flex; flex-direction: column; align-items: center; max-width: 180px; }
-        .char-img-wrapper img { width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 5px; }
+        .char-img-wrapper img { width: 100%; border: 1px solid #ccc; margin-bottom: 5px; }
         .char-img-credit { font-size: 11px; color: #3b82f6; text-decoration: none; text-transform: lowercase; }
         .char-img-credit:hover { text-decoration: underline; }
         
@@ -141,13 +115,13 @@
         .centered-text { text-align: center; line-height: 1.6; font-size: 14px; }
         .separator { height: 1px; width: 50%; background: #ccc; margin: 15px auto; }
         
-        .vb-btn { display: inline-block; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin: 5px; font-size: 14px; text-transform: lowercase; transition: 0.2s; border: none; cursor: pointer; font-family: inherit;}
+        .vb-btn { display: inline-block; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; margin: 5px; font-size: 14px; text-transform: lowercase; border: 1px solid #1d4ed8; cursor: pointer; font-family: inherit;}
         .vb-btn:hover { background: #1d4ed8; }
-        .preview-btn { background: #ef4444; }
+        .preview-btn { background: #ef4444; border: 1px solid #991b1b; }
         .preview-btn:hover { background: #dc2626; }
-        .extra-btn { background: #10b981; }
+        .extra-btn { background: #10b981; border: 1px solid #047857; }
         .extra-btn:hover { background: #059669; }
-        .guide-btn { background: #8b5cf6; }
+        .guide-btn { background: #8b5cf6; border: 1px solid #5b21b6; }
         .guide-btn:hover { background: #7c3aed; }
         
         .tos-text { font-size: 14px; text-align: left; line-height: 1.6; white-space: pre-line; text-transform: lowercase; color: #333; }
@@ -155,31 +129,31 @@
 
         /* Player Specific */
         .player-list-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #ddd; font-size: 13px; text-transform: lowercase; }
-        .player-list-item:hover { background: #ddd; }
+        .player-list-item:hover { background: #eee; }
         .player-list-item.active { background: #3b82f6; color: white; }
 
         /* Start Menu */
         .start-menu {
-            position: absolute; bottom: 40px; left: 0; width: 320px; background: rgba(245, 245, 245, 0.98);
-            backdrop-filter: blur(15px); border: 1px solid #444; display: none; flex-direction: column;
-            box-shadow: 0 0 25px rgba(0,0,0,0.5); border-radius: 6px 6px 0 0; padding: 5px 0;
+            position: absolute; bottom: 40px; left: 0; width: 320px; background: #eee;
+            border: 1px solid #000; display: none; flex-direction: column; padding: 5px 0;
         }
         .start-menu.active { display: flex; }
-        .start-item { padding: 12px 15px; display: flex; align-items: center; color: #222; text-decoration: none; cursor: pointer; text-transform: lowercase; font-size: 14px; }
-        .start-item:hover { background: #0078d7; color: white; }
+        .start-item { padding: 12px 15px; display: flex; align-items: center; color: #000; text-decoration: none; cursor: pointer; text-transform: lowercase; font-size: 14px; }
+        .start-item:hover { background: #3b82f6; color: white; }
         .start-item img { width: 24px; height: 24px; margin-right: 12px; object-fit: contain; }
 
         /* Calculator */
         .calc-container { width: 230px; padding: 10px; background: #d9e4f1; }
         #calc-display { width: 100%; height: 40px; background: white; border: 1px solid #999; margin-bottom: 10px; text-align: right; padding: 5px; font-size: 20px; outline: none;}
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        .calc-grid button { padding: 12px; border: 1px solid #888; background: linear-gradient(#ffffff, #e0e0e0); cursor: pointer; }
+        .calc-grid button { padding: 12px; border: 1px solid #888; background: #f9f9f9; cursor: pointer; font-family: inherit;}
+        .calc-grid button:hover { background: #e9e9e9; }
 
         /* Paint Program */
         #paint-canvas { background: white; cursor: crosshair; }
-        .paint-toolbar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; display: flex; gap: 5px; }
-        .paint-tool { background: none; color: white; border: 1px solid white; border-radius: 15px; padding: 5px 15px; cursor: pointer; font-size: 12px; }
-        .paint-tool.active { background: white; color: black; }
+        .paint-toolbar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #eee; border: 1px solid #000; padding: 5px 10px; display: flex; gap: 5px; }
+        .paint-tool { background: white; color: black; border: 1px solid #000; padding: 5px 15px; cursor: pointer; font-size: 12px; font-family: inherit;}
+        .paint-tool.active { background: #3b82f6; color: white; }
 
         /* Dialog Overlay */
         .dialog-overlay {
@@ -188,15 +162,17 @@
             align-items: center; justify-content: center;
         }
         .dialog-box {
-            background: white; padding: 25px; border-radius: 8px; width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;
+            background: #eee; padding: 25px; border: 1px solid #000; width: 400px; text-align: center;
         }
         .dialog-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .dialog-text { font-size: 14px; margin-bottom: 20px; color: #444; line-height: 1.4; }
+        .dialog-text { font-size: 14px; margin-bottom: 20px; color: #333; line-height: 1.4; }
         .dialog-btns { display: flex; justify-content: center; gap: 10px; }
-        .dialog-btns button { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .dialog-btns button { padding: 8px 20px; border: 1px solid #000; cursor: pointer; font-size: 14px; font-family: inherit;}
         .btn-yes { background: #3b82f6; color: white; }
-        .btn-no { background: #e5e5e5; color: black; }
+        .btn-no { background: #ddd; color: black; }
+
+        /* Colors for Specific App Headers */
+        #win-about .window-header { background: #800080; }
     </style>
 </head>
 <body>
@@ -208,7 +184,7 @@
             <h2 style="color: white; font-weight: normal; text-transform: lowercase;">c4ke</h2>
             <button class="login-btn" onclick="unlock()">log in</button>
         </div>
-        <div style="color: rgba(255,255,255,0.6); font-size: 12px; text-transform: lowercase;">aluminiumOS 1.0</div>
+        <div style="color: white; font-size: 12px; text-transform: lowercase;">aluminiumOS 1.0</div>
     </div>
 
     <div id="exit-dialog" class="dialog-overlay">
@@ -286,7 +262,7 @@
                 <br><br>
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                     <a href="https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/CplusVBelarusianRecList.zip" target="_blank" class="vb-btn" style="width: 250px;">reclist</a>
-                    <a href="https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/CplusVBelarusianBaseOto.zip" target="_blank" class="vb-btn" style="width: 250px;">kazeru's base oto</a>
+                    <a href="https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/CplusVBelarusianBaseOto.zip" target="_blank" class="vb-btn extra-btn" style="width: 250px;">kazeru's base oto</a>
                 </div>
             </div>
         </div>
@@ -320,7 +296,7 @@
         <div class="window-body">
             <div class="sidebar" id="player-sidebar" style="width: 250px;"></div>
             <div class="main-content" style="padding: 0; background: #000; display: flex; align-items: center; justify-content: center;">
-                <video id="local-video" width="100%" height="100%" controls style="outline:none;"></video>
+                <video id="local-video" width="100%" height="100%" controls style="outline:none; border: 1px solid #333;"></video>
             </div>
         </div>
     </div>
@@ -338,7 +314,7 @@
 
     <div id="win-notepad" class="window" style="width: 450px; height: 350px; top: 50px; left: 100px;">
         <div class="window-header"><span>notepad</span><button class="close-btn" onclick="closeApp('win-notepad')">X</button></div>
-        <div class="window-body"><textarea style="width:100%; border:none; padding:15px; outline:none; resize:none; font-size:16px;"></textarea></div>
+        <div class="window-body"><textarea style="width:100%; border:none; padding:15px; outline:none; resize:none; font-size:16px; font-family: inherit;"></textarea></div>
     </div>
 
     <div id="win-paint" class="window" style="width: 500px; height: 400px; top: 80px; left: 150px;">
@@ -346,8 +322,8 @@
         <div class="window-body">
             <canvas id="paint-canvas" width="500" height="365"></canvas>
             <div class="paint-toolbar">
-                <button class="paint-tool active" id="tool-pencil" onclick="setPaintTool('pencil')">✏️ pencil</button>
-                <button class="paint-tool" id="tool-eraser" onclick="setPaintTool('eraser')">🧼 eraser</button>
+                <button class="paint-tool active" id="tool-pencil" onclick="setPaintTool('pencil')">pencil</button>
+                <button class="paint-tool" id="tool-eraser" onclick="setPaintTool('eraser')">eraser</button>
             </div>
         </div>
     </div>
@@ -411,6 +387,8 @@
                 name: "keeki",
                 pronouns: "he/they",
                 managed: "managed, designed, voiced by c4ke",
+                headerColor: "#ef4444",
+                headerTextColor: "#FFF",
                 imgs: [
                     { src: "media/keekiutaunormal.webp", credit: "artwork by morimori_1411", link: "https://x.com/morimori_1411" },
                     { src: "media/keekirvcnormal.webp", credit: "artwork by х?дожник х!ев", link: "https://t.me/vzroslie_zapretbl" }
@@ -428,6 +406,8 @@
                 name: "kazeru",
                 pronouns: "he/him",
                 managed: "managed, designed, voiced by c4ke",
+                headerColor: "#eab308",
+                headerTextColor: "#000",
                 imgs: [
                     { src: "media/kazeruutau.webp", credit: "artwork by х?дожник х!ев", link: "https://t.me/vzroslie_zapretbl" }
                 ],
@@ -451,6 +431,8 @@
                 name: "zhao mei",
                 pronouns: "she/her",
                 managed: "managed, designed, voiced by c4ke",
+                headerColor: "#06b6d4",
+                headerTextColor: "#000",
                 imgs: [
                     { src: "media/meiutau.webp", credit: "artwork by morimori_1411", link: "https://x.com/morimori_1411" }
                 ],
@@ -472,6 +454,8 @@
                 isMisc: true,
                 winName: "jevilloid.exe",
                 name: "jevilloid",
+                headerColor: "#3b82f6",
+                headerTextColor: "#FFF",
                 imgs: [{ src: "media/jevil.webp" }],
                 voicebanks: [{ label: "c+v utau", url: "https://github.com/AluminiumCake/aluminiumcake.github.io/releases/download/misc/jeviloid.zip" }],
                 previewVideoIndex: 3,
@@ -501,6 +485,11 @@ you are allowed to make derivative voicebanks with original samples and redistri
             currentChar = characters[charId];
             document.getElementById('char-win-title').innerText = currentChar.winName;
             
+            // Динамический цвет шапки
+            const charHeader = document.querySelector('#win-character .window-header');
+            charHeader.style.background = currentChar.headerColor || '#0000FF';
+            charHeader.style.color = currentChar.headerTextColor || '#FFFFFF';
+            
             const tbChar = document.getElementById('tb-win-character');
             tbChar.style.display = 'flex';
             document.getElementById('tb-char-icon').src = Array.isArray(currentChar.imgs) ? currentChar.imgs[0].src : currentChar.imgs[0].src;
@@ -520,13 +509,13 @@ you are allowed to make derivative voicebanks with original samples and redistri
                 content.innerHTML = `
                     <div class="centered-text" style="padding-top: 30px;">
                         <div class="char-img-wrapper" style="margin: 0 auto 25px auto; max-width: 180px;">
-                            <img src="${currentChar.imgs[0].src}" style="width: 100%; border-radius: 8px;">
+                            <img src="${currentChar.imgs[0].src}" style="width: 100%; border: 1px solid #ccc;">
                         </div>
                         <div>
                             <a href="${currentChar.voicebanks[0].url}" target="_blank" class="vb-btn">${currentChar.voicebanks[0].label}</a>
                         </div>
                         <div style="margin-top: 15px;">
-                            <button onclick="playPreview(${currentChar.previewVideoIndex})" class="vb-btn preview-btn">▶ voicebank preview</button>
+                            <button onclick="playPreview(${currentChar.previewVideoIndex})" class="vb-btn preview-btn">voicebank preview</button>
                         </div>
                         <div style="margin-top: 50px; font-size: 11px; color: #888; text-transform: lowercase;">
                             ${currentChar.credits}
@@ -582,7 +571,7 @@ you are allowed to make derivative voicebanks with original samples and redistri
                     <div>${btnsHtml}</div>
                     ${extraHtml}
                     <div style="margin-top: 25px;">
-                        <button onclick="playPreview(${currentChar.previewVideoIndex})" class="vb-btn preview-btn">▶ voicebanks preview</button>
+                        <button onclick="playPreview(${currentChar.previewVideoIndex})" class="vb-btn preview-btn">voicebanks preview</button>
                     </div>
                 `;
             } else if (tab === 'tos') {
@@ -667,7 +656,6 @@ you are allowed to make derivative voicebanks with original samples and redistri
             header.onmousedown = (e) => {
                 el.style.zIndex = ++zIndex;
                 pos3 = e.clientX; pos4 = e.clientY;
-                if(isIcon) el.style.transition = 'none';
 
                 document.onmousemove = (e) => {
                     pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
@@ -687,7 +675,6 @@ you are allowed to make derivative voicebanks with original samples and redistri
                 document.onmouseup = () => {
                     document.onmousemove = null; document.onmouseup = null;
                     if (isIcon) {
-                        el.style.transition = 'top 0.2s ease, left 0.2s ease';
                         let fL = Math.round((parseInt(el.style.left) - OFFSET) / GRID_SIZE) * GRID_SIZE + OFFSET;
                         let fT = Math.round((parseInt(el.style.top) - OFFSET) / GRID_SIZE) * GRID_SIZE + OFFSET;
                         const icons = document.querySelectorAll('.desktop > .icon');
